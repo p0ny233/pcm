@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-3-Clause
+﻿// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2009-2022, Intel Corporation
 // written by Roman Dementiev,
 //            Patrick Konsor
@@ -36,31 +36,31 @@ protected:
     virtual int load_driver_()
     {
         SYSTEM_INFO sys_info;
-        SecureZeroMemory(&sys_info, sizeof(sys_info));
+        SecureZeroMemory(&sys_info, sizeof(sys_info));  // 将 sizeof(sys_info) 个字节的缓冲区置为 0
 
         GetCurrentDirectory(MAX_PATH - 10, driver_filename);
 
         GetNativeSystemInfo(&sys_info);
         switch (sys_info.wProcessorArchitecture)
         {
-        case PROCESSOR_ARCHITECTURE_AMD64:
-            _tcscat_s(driver_filename, MAX_PATH, TEXT("\\winpmem_x64.sys"));
-            if (GetFileAttributes(driver_filename) == INVALID_FILE_ATTRIBUTES)
-            {
-                std::cerr << "ERROR: winpmem_x64.sys not found in current directory. Download it from https://github.com/Velocidex/WinPmem/blob/master/kernel/binaries/winpmem_x64.sys .\n";
-                std::cerr << "ERROR: Memory bandwidth statistics will not be available.\n";
-            }
-            break;
-        case PROCESSOR_ARCHITECTURE_INTEL:
-            _tcscat_s(driver_filename, MAX_PATH, TEXT("\\winpmem_x86.sys"));
-            if (GetFileAttributes(driver_filename) == INVALID_FILE_ATTRIBUTES)
-            {
-                std::cerr << "ERROR: winpmem_x86.sys not found in current directory. Download it from https://github.com/Velocidex/WinPmem/blob/master/kernel/binaries/winpmem_x86.sys .\n";
-                std::cerr << "ERROR: Memory bandwidth statistics will not be available.\n";
-            }
-            break;
-        default:
-            return -1;
+            case PROCESSOR_ARCHITECTURE_AMD64:
+                _tcscat_s(driver_filename, MAX_PATH, TEXT("\\winpmem_x64.sys"));
+                if (GetFileAttributes(driver_filename) == INVALID_FILE_ATTRIBUTES)
+                {
+                    std::cerr << "ERROR: winpmem_x64.sys not found in current directory. Download it from https://github.com/Velocidex/WinPmem/blob/master/kernel/binaries/winpmem_x64.sys .\n";
+                    std::cerr << "ERROR: Memory bandwidth statistics will not be available.\n";
+                }
+                break;
+            case PROCESSOR_ARCHITECTURE_INTEL:
+                _tcscat_s(driver_filename, MAX_PATH, TEXT("\\winpmem_x86.sys"));
+                if (GetFileAttributes(driver_filename) == INVALID_FILE_ATTRIBUTES)
+                {
+                    std::cerr << "ERROR: winpmem_x86.sys not found in current directory. Download it from https://github.com/Velocidex/WinPmem/blob/master/kernel/binaries/winpmem_x86.sys .\n";
+                    std::cerr << "ERROR: Memory bandwidth statistics will not be available.\n";
+                }
+                break;
+            default:
+                return -1;
         }
         return 1;
     }
@@ -70,12 +70,12 @@ protected:
     }
 };
 
-std::shared_ptr<WinPmem> WinPmemMMIORange::pmem;
-Mutex WinPmemMMIORange::mutex;
-bool WinPmemMMIORange::writeSupported = false;
+std::shared_ptr<WinPmem> WinPmemMMIORange::pmem;  // static 修饰
+Mutex WinPmemMMIORange::mutex;  // static 修饰
+bool WinPmemMMIORange::writeSupported = false;  // static 修饰
 
 WinPmemMMIORange::WinPmemMMIORange(uint64 baseAddr_, uint64 /* size_ */, bool readonly_) : startAddr(baseAddr_), readonly(readonly_)
-{
+{   // 构造函数
     mutex.lock();
     if (pmem.get() == NULL)
     {
@@ -89,12 +89,15 @@ WinPmemMMIORange::WinPmemMMIORange(uint64 baseAddr_, uint64 /* size_ */, bool re
 
 MMIORange::MMIORange(uint64 baseAddr_, uint64 size_, bool readonly_)
 {
-    auto hDriver = openMSRDriver();
-    if (hDriver != INVALID_HANDLE_VALUE)
+    auto hDriver = openMSRDriver();       // failed
+    if (hDriver != INVALID_HANDLE_VALUE)  // by pass
     {
         DWORD reslength = 0;
         uint64 result = 0;
-        const BOOL status = DeviceIoControl(hDriver, IO_CTL_MMAP_SUPPORT, NULL, 0, &result, sizeof(uint64), &reslength, NULL);
+        const BOOL status = DeviceIoControl(hDriver, IO_CTL_MMAP_SUPPORT, NULL, 0, &result, sizeof(uint64), &reslength, NULL);  
+        // 允许应用程序发送低级命令到设备驱动程序
+        // IO_CTL_MMAP_SUPPORT 通常用于查询设备是否支持内存映射 are you sure??? this answer from to kimi chat
+
         CloseHandle(hDriver);
         if (status == TRUE && reslength == sizeof(uint64) && result == 1)
         {
@@ -106,8 +109,9 @@ MMIORange::MMIORange(uint64 baseAddr_, uint64 size_, bool readonly_)
             std::cerr << "MSR.sys does not support mmap operations\n";
         }
     }
-
-    impl = std::make_shared<WinPmemMMIORange>(baseAddr_, size_, readonly_);
+    // std::shared_ptr<MMIORangeInterface> impl;
+    impl = std::make_shared<WinPmemMMIORange>(baseAddr_, size_, readonly_);  // 初始化 shared_ptr 智能指针
+    // 实例化 WinPmemMMIORange，调用的有参构造函数，
 }
 
 OwnMMIORange::OwnMMIORange(uint64 baseAddr_, uint64 size_, bool /* readonly_ */)

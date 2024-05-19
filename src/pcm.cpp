@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-3-Clause
+﻿// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2009-2022, Intel Corporation
 // written by Roman Dementiev,
 //            Thomas Willhalm,
@@ -119,7 +119,7 @@ void print_basic_metrics(const PCM * m, const State & state1, const State & stat
             cout << setNextColor() <<  "   " << getIPC(state1, state2);
             if (m->isActiveRelativeFrequencyAvailable())
             {
-                cout << setNextColor() <<  "    " << getActiveAverageFrequency(state1, state2)/1e9;
+                cout << setNextColor() <<  "    +++" << getActiveAverageFrequency(state1, state2)/1e9;
             }
             break;
         default:
@@ -1354,7 +1354,7 @@ int mainThrows(int argc, char * argv[])
                 exit(EXIT_FAILURE);
             }
             std::stringstream ss(*argv);
-            while(ss.good())
+            while(ss.good())  // 检查是否没有发生错误，例如是否可执行I/O操作
             {
                 string s;
                 int core_id;
@@ -1482,7 +1482,7 @@ int mainThrows(int argc, char * argv[])
 
     if (disable_JKT_workaround) m->disableJKTWorkaround();
 
-    if (reset_pmu)
+    if (reset_pmu)  // false
     {
         cerr << "\n Resetting PMU configuration\n";
         m->resetPMU();
@@ -1538,7 +1538,12 @@ int mainThrows(int argc, char * argv[])
         MySystem(sysCmd, sysArgv);
     }
 
-    mainLoop([&]()
+    // https://github.com/p0ny233/Cpp_11/tree/master/09_%E5%8F%AF%E8%B0%83%E7%94%A8%E5%AF%B9%E8%B1%A1
+    // 
+    // 1. mainLoop是一个实例，且重载了 operator() 操作符函数，此时mainLoop类对象可以当做函数使用，因此mainLoop称为仿函数。
+    // 2. mainLoop仿函数调用时，传递的参数是一个匿名函数,该匿名函数还未被调用，仅仅将 匿名函数地址作为参数值传递
+
+    mainLoop([&]()  // [] 表示这是一个 lambda表达式; & 表示以 引用传递的方式； () 表示 匿名函数调用时的需要的参数，这里是空的，意味着 匿名函数被调用时不需要传参
     {
         if (enforceFlush || !csv_output) cout << std::flush;
 

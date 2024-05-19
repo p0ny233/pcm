@@ -1217,12 +1217,12 @@ bool PCM::discoverSystemTopology()
         {
             threads_per_core = (pi->Processor.Flags == LTP_PC_SMT) ? 2 : 1;
             // std::cout << "thr per core: " << threads_per_core << "\n";
-            num_cores += threads_per_core;
+            num_cores += threads_per_core;   // 初始化 cpu总线程数 12
         }
     }
     // std::cout << std::flush;
 
-    num_online_cores = num_cores;
+    num_online_cores = num_cores;  // 初始化 cpu总线程数 12 
 
     if (num_cores != GetActiveProcessorCount(ALL_PROCESSOR_GROUPS))
     {
@@ -1890,7 +1890,7 @@ void PCM::initUncoreObjects()
                break;
 */
            default:
-               clientBW = std::make_shared<ClientBW>();
+               clientBW = std::make_shared<ClientBW>();  // 初始化智能指针，调用 ClientBW 构造函数
            }
            clientImcReads = std::make_shared<CounterWidthExtender>(
                new CounterWidthExtender::ClientImcReadsCounter(clientBW), 32, 10000);
@@ -2847,7 +2847,7 @@ PCM::PCM() :
 
     initCStateSupportTables();
 
-    if(!discoverSystemTopology()) return;
+    if(!discoverSystemTopology()) return;   // 初始化 cpu总线程数 12 对应 任务管理器中的 逻辑处理器数量
 
     if(!initMSR()) return;
 

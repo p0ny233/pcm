@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //     Author : hiyohiyo
 //       Mail : hiyohiyo@crystalmark.info
 //        Web : http://openlibsys.org/
@@ -297,8 +297,10 @@ BOOL InitOpenLibSys(HMODULE *hModule)
 	{
 		return FALSE;
 	}
-
-	return InitializeOls();
+	BOOL b = false;
+	b = InitializeOls();  // 需要 管理员权限 运行
+	//std::cout << "GetLastError : " << GetLastError() << std::endl;
+	return b;
 }
 
 //-----------------------------------------------------------------------------

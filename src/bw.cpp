@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-3-Clause
+﻿// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2009-2022, Intel Corporation
 // written by Roman Dementiev,
 //            Patrick Konsor
@@ -78,6 +78,7 @@ namespace pcm {
 ClientBW::ClientBW()
 {
     mmioRange = std::make_shared<MMIORange>(getClientIMCStartAddr() + PCM_CLIENT_IMC_EVENT_BASE, PCM_CLIENT_IMC_MMAP_SIZE - PCM_CLIENT_IMC_EVENT_BASE);
+    // 初始化智能指针，调用 MMIORange 有参构造函数
 }
 
 uint64 ClientBW::getImcReads()

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-3-Clause
+﻿// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2009-2022, Intel Corporation
 // written by Roman Dementiev
 
@@ -481,6 +481,7 @@ inline void clear_screen() {
 
 inline HANDLE openMSRDriver()
 {
+    // 以读写模式打开一个名为 "\\\\.\\RDMSR" 的设备，如果该设备已经存在的话。
     return CreateFile(PCM_MSR_DRV_NAME, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 }
 #endif
